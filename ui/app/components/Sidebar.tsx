@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const PERSONAS = [
   { id: "degen",   emoji: "🦍", name: "The Degen",   desc: "Apes everything. Max risk.",         color: "#f97316", bg: "#fff7ed", calls: 142, win: "68%", roi: "+2.3x" },
@@ -9,19 +9,11 @@ const PERSONAS = [
   { id: "boomer",  emoji: "👴", name: "The Boomer",  desc: "What even is a gas fee?",           color: "#3b82f6", bg: "#eff6ff", calls: 54,  win: "55%", roi: "+0.8x" },
 ];
 
-const TRENDING = [
-  { t: "CWH",   ch: "+412%", mc: "$12K",  up: true  },
-  { t: "WOJAK", ch: "+88%",  mc: "$22K",  up: true  },
-  { t: "BONK2", ch: "+320%", mc: "$180K", up: true  },
-  { t: "SHIB3", ch: "+890%", mc: "$45K",  up: true  },
-  { t: "FROG",  ch: "+67%",  mc: "$9K",   up: true  },
-];
-
-const RUGGED = [
-  { t: "RUGPULL", ch: "-97%", lost: "$12K" },
-  { t: "NPC",     ch: "-14%", lost: "$2K"  },
-  { t: "BBDOGE",  ch: "-22%", lost: "$5K"  },
-];
+type MarketStats = {
+  trending: { t: string; ch: string; mc: string; up: boolean }[];
+  rugged: { t: string; ch: string; lost: string }[];
+  fearValue: number;
+};
 
 export function Sidebar({
   activePersona,
@@ -30,6 +22,17 @@ export function Sidebar({
   activePersona: string;
   onPersonaChange: (id: string) => void;
 }) {
+  const [stats, setStats] = useState<MarketStats | null>(null);
+
+  useEffect(() => {
+    fetch("/api/market-stats")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setStats(data);
+      })
+      .catch(err => console.error("Failed to fetch market stats:", err));
+  }, []);
+
   return (
     <aside
       style={{
@@ -181,27 +184,33 @@ export function Sidebar({
             boxShadow: "var(--shadow-sm)",
           }}
         >
-          {TRENDING.map((t, i) => (
-            <div
-              key={t.t}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "9px 12px",
-                borderBottom: i < TRENDING.length - 1 ? "1px solid var(--border)" : "none",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "12px", color: "var(--ink-4)", width: "14px" }}>{i + 1}</span>
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ink)" }}>${t.t}</span>
+          {!stats ? (
+            <div style={{ padding: "20px", textAlign: "center", fontSize: "12px", color: "var(--ink-4)" }}>Loading...</div>
+          ) : stats.trending.length === 0 ? (
+            <div style={{ padding: "20px", textAlign: "center", fontSize: "12px", color: "var(--ink-4)" }}>No trending tokens</div>
+          ) : (
+            stats.trending.map((t, i) => (
+              <div
+                key={t.t + i}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "9px 12px",
+                  borderBottom: i < stats.trending.length - 1 ? "1px solid var(--border)" : "none",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "12px", color: "var(--ink-4)", width: "14px" }}>{i + 1}</span>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ink)" }}>${t.t}</span>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--green)" }}>{t.ch}</div>
+                  <div style={{ fontSize: "10px", color: "var(--ink-4)" }}>{t.mc}</div>
+                </div>
               </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--green)" }}>{t.ch}</div>
-                <div style={{ fontSize: "10px", color: "var(--ink-4)" }}>{t.mc}</div>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
 
@@ -228,24 +237,30 @@ export function Sidebar({
             boxShadow: "var(--shadow-sm)",
           }}
         >
-          {RUGGED.map((t, i) => (
-            <div
-              key={t.t}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "9px 12px",
-                borderBottom: i < RUGGED.length - 1 ? "1px solid var(--border)" : "none",
-              }}
-            >
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--red)" }}>${t.t}</span>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--red)" }}>{t.ch}</div>
-                <div style={{ fontSize: "10px", color: "var(--ink-4)" }}>{t.lost} lost</div>
+          {!stats ? (
+            <div style={{ padding: "20px", textAlign: "center", fontSize: "12px", color: "var(--ink-4)" }}>Loading...</div>
+          ) : stats.rugged.length === 0 ? (
+            <div style={{ padding: "20px", textAlign: "center", fontSize: "12px", color: "var(--ink-4)" }}>No rugs yet today!</div>
+          ) : (
+            stats.rugged.map((t, i) => (
+              <div
+                key={t.t + i}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "9px 12px",
+                  borderBottom: i < stats.rugged.length - 1 ? "1px solid var(--border)" : "none",
+                }}
+              >
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--red)" }}>${t.t}</span>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--red)" }}>{t.ch}</div>
+                  <div style={{ fontSize: "10px", color: "var(--ink-4)" }}>{t.lost} lost</div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
     </aside>

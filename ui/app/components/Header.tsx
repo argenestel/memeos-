@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const TICKERS = [
-  { t: "CWH",    v: "+412%", up: true  },
-  { t: "PGAINS", v: "-8%",   up: false },
-  { t: "SDM",    v: "+2100%",up: true  },
-  { t: "WOJAK",  v: "+88%",  up: true  },
-  { t: "NPC",    v: "-14%",  up: false },
-  { t: "BONK2",  v: "+320%", up: true  },
-  { t: "FROG",   v: "+67%",  up: true  },
-  { t: "BBDOGE", v: "-22%",  up: false },
-  { t: "SHIB3",  v: "+890%", up: true  },
+  { t: "CWH", v: "+412%", up: true },
+  { t: "PGAINS", v: "-8%", up: false },
+  { t: "SDM", v: "+2100%", up: true },
+  { t: "WOJAK", v: "+88%", up: true },
+  { t: "NPC", v: "-14%", up: false },
+  { t: "BONK2", v: "+320%", up: true },
+  { t: "FROG", v: "+67%", up: true },
+  { t: "BBDOGE", v: "-22%", up: false },
+  { t: "SHIB3", v: "+890%", up: true },
 ];
 
 export function Header({
@@ -52,7 +53,14 @@ export function Header({
         }}
       >
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            flexShrink: 0,
+          }}
+        >
           <div
             style={{
               width: "32px",
@@ -64,7 +72,9 @@ export function Header({
               justifyContent: "center",
             }}
           >
-            <span style={{ color: "white", fontSize: "16px", lineHeight: 1 }}>🐸</span>
+            <span style={{ color: "white", fontSize: "16px", lineHeight: 1 }}>
+              🐸
+            </span>
           </div>
           <span
             style={{
@@ -101,11 +111,11 @@ export function Header({
           }}
         >
           {[
-            { id: "all",     label: "All",     emoji: "" },
-            { id: "degen",   label: "Degen",   emoji: "🦍" },
-            { id: "doomer",  label: "Doomer",  emoji: "📉" },
+            { id: "all", label: "All", emoji: "" },
+            { id: "degen", label: "Degen", emoji: "🦍" },
+            { id: "doomer", label: "Doomer", emoji: "📉" },
             { id: "moonboy", label: "Moonboy", emoji: "🚀" },
-            { id: "boomer",  label: "Boomer",  emoji: "👴" },
+            { id: "boomer", label: "Boomer", emoji: "👴" },
           ].map((p) => {
             const active = activePersona === p.id;
             return (
@@ -137,20 +147,28 @@ export function Header({
         </nav>
 
         {/* Right actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-          <button
-            onClick={() => setConnected((c) => !c)}
-            className="btn"
-            style={{
-              background: connected ? "var(--orange-bg)" : "var(--orange)",
-              color: connected ? "var(--orange)" : "white",
-              border: connected ? "1px solid rgba(249,115,22,0.25)" : "none",
-              fontSize: "13px",
-              padding: "7px 16px",
-            }}
-          >
-            {connected ? "0xDEAD…BEEF" : "Connect Wallet"}
-          </button>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            flexShrink: 0,
+          }}
+        >
+          <ConnectButton />
+          {/* <button */}
+          {/*   onClick={() => setConnected((c) => !c)} */}
+          {/*   className="btn" */}
+          {/*   style={{ */}
+          {/*     background: connected ? "var(--orange-bg)" : "var(--orange)", */}
+          {/*     color: connected ? "var(--orange)" : "white", */}
+          {/*     border: connected ? "1px solid rgba(249,115,22,0.25)" : "none", */}
+          {/*     fontSize: "13px", */}
+          {/*     padding: "7px 16px", */}
+          {/*   }} */}
+          {/* > */}
+          {/*   {connected ? "0xDEAD…BEEF" : "Connect Wallet"} */}
+          {/* </button> */}
         </div>
       </div>
 
@@ -166,12 +184,39 @@ export function Header({
           position: "relative",
         }}
       >
-        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "48px", background: "linear-gradient(to right, var(--bg), transparent)", zIndex: 2, pointerEvents: "none" }} />
-        <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "48px", background: "linear-gradient(to left, var(--bg), transparent)", zIndex: 2, pointerEvents: "none" }} />
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: "48px",
+            background: "linear-gradient(to right, var(--bg), transparent)",
+            zIndex: 2,
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: "48px",
+            background: "linear-gradient(to left, var(--bg), transparent)",
+            zIndex: 2,
+            pointerEvents: "none",
+          }}
+        />
 
         <div
           className="ticker"
-          style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap", height: "100%" }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            whiteSpace: "nowrap",
+            height: "100%",
+          }}
         >
           {doubled.map((c, i) => (
             <div
@@ -186,7 +231,9 @@ export function Header({
                 borderRight: "1px solid var(--border)",
               }}
             >
-              <span style={{ fontWeight: 600, color: "var(--ink-2)" }}>${c.t}</span>
+              <span style={{ fontWeight: 600, color: "var(--ink-2)" }}>
+                ${c.t}
+              </span>
               <span
                 style={{
                   fontWeight: 700,

@@ -42,6 +42,9 @@ export type FourMemeTokenDetail = {
   networkCode: string;
   label: string;
   dexType: string;
+  userId: number;
+  userAddress: string;
+  userName: string;
   tokenPrice: {
     price: string;
     maxPrice: string;
@@ -59,17 +62,29 @@ export type FourMemeTokenDetail = {
   };
 };
 
-export type SearchType = 'HOT' | 'NEW' | 'LISTED';
+export type SearchType = 'HOT' | 'NEW' | 'VOL';
 
 export async function fetchTokenList(
   pageIndex = 1,
   pageSize = 20,
   type: SearchType = 'NEW',
 ): Promise<FourMemeToken[]> {
+  const isNew = type === 'NEW';
+  const isVol = type === 'VOL';
+
+  const body = {
+    pageIndex,
+    pageSize,
+    type,
+    ...(isNew ? { sort: 'DESC', listType: 'NOR' } : {}),
+    ...(isVol ? { status: 'PUBLISH', listType: 'NOR' } : {}),
+    ...(!isNew && !isVol ? { listType: 'ADV' } : {})
+  };
+
   const res = await fetch(`${BASE}/public/token/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pageIndex, pageSize, type, listType: 'ADV' }),
+    body: JSON.stringify(body),
     next: { revalidate: 0 },
   });
 
@@ -77,6 +92,24 @@ export async function fetchTokenList(
   const json = await res.json();
   if (json.code !== 0) throw new Error(`four.meme search error: ${json.msg}`);
   return json.data as FourMemeToken[];
+}
+
+export async function fetchUserTokens(userId: string | number): Promise<any[]> {
+  const url = `${BASE}/private/user/token/create/list?userId=${userId}&orderBy=CREATE_DATE&sorted=DESC&tokenName=&pageIndex=1&pageSize=300&symbol=`;
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'accept': 'application/json, text/plain, */*',
+      'meme-web-access': 'MTc3NjY5NDU5OTMxOF8weDNkOTY5NmM3ODEwMGVmMjEyZGExNTdjNDViN2VlZjgyNzUxZGU0OWRfUkVEdUNC.o5MJ4P7DcnDIShInLsPLdfrXPqp6dvpJBikWLPPr6-U',
+    },
+    next: { revalidate: 0 },
+  });
+
+  if (!res.ok) throw new Error(`four.meme user tokens failed: ${res.status}`);
+  const json = await res.json();
+  if (json.code !== 0) throw new Error(`four.meme user tokens error: ${json.msg}`);
+  return json.data as any[];
 }
 
 export async function fetchTokenDetail(address: string): Promise<FourMemeTokenDetail> {

@@ -1,10 +1,8 @@
-import { $ } from "bun";
 import postgres from "postgres";
-import { config } from "dotenv";
 
-config({ path: ".env.local" });
-
-const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require' });
+const sql = postgres("postgresql://postgres:RatEEvq%23fx17ay404GwA@db.ugkucjbnwgohmmhdebri.supabase.co:5432/postgres", {
+  ssl: "require",
+});
 
 async function init() {
   console.log("Creating table...");
@@ -19,7 +17,11 @@ async function init() {
     );
   `;
   console.log("Table created!");
+  await sql.end();
   process.exit(0);
 }
 
-init().catch(console.error);
+init().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
